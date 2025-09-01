@@ -1,4 +1,5 @@
 --[[
+--ky/\
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -167,6 +168,16 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'yaml', 'yml' },
+  callback = function()
+    vim.opt_local.cursorcolumn = true -- Highlight the current column
+    vim.opt_local.shiftwidth = 2 -- Number of spaces to use for each step of (auto)indent
+    vim.opt_local.softtabstop = 2 -- Number of spaces that a <Tab> counts for while performing editing operations
+    vim.opt_local.tabstop = 2 -- Number of spaces that a <Tab> in the file counts for
+    vim.opt_local.expandtab = true -- Expand tab to 2 spaces
+  end,
+})
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -633,6 +644,18 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         gopls = {},
+        yamlls = {
+          settings = {
+            yaml = {
+              schemaStore = {
+                enabled = false,
+                url = '',
+              },
+              schemas = require('schemastore').yaml.schemas(),
+            },
+          },
+        },
+        puppet = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -643,27 +666,27 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         ts_ls = {
           -- Extra settings for JavaScript/TypeScript
-          init_options = {
-            hostInfo = 'neovim',
-            preferences = {
-              includeCompletionsForModuleExports = true,
-              includeCompletionsWithInsertText = true,
-              includeCompletionsWithSnippetText = true,
-              includeAutomaticOptionalChainCompletions = true,
-              includeCompletionsForImportStatements = true,
-              providePrefixAndSuffixTextForRename = false,
-              quotePreference = 'auto',
-            },
-          },
-          settings = {
-            javascript = {
-              suggest = { completeFunctionCalls = true },
-              validate = { enable = true },
-            },
-            typescript = {
-              suggest = { completeFunctionCalls = true },
-            },
-          },
+          -- init_options = {
+          --   hostInfo = 'neovim',
+          --   preferences = {
+          --     includeCompletionsForModuleExports = true,
+          --     includeCompletionsWithInsertText = true,
+          --     includeCompletionsWithSnippetText = true,
+          --     includeAutomaticOptionalChainCompletions = true,
+          --     includeCompletionsForImportStatements = true,
+          --     providePrefixAndSuffixTextForRename = false,
+          --     quotePreference = 'auto',
+          --   },
+          -- },
+          -- settings = {
+          --   javascript = {
+          --     suggest = { completeFunctionCalls = true },
+          --     validate = { enable = true },
+          --   },
+          --   typescript = {
+          --     suggest = { completeFunctionCalls = true },
+          --   },
+          -- },
         },
 
         lua_ls = {
@@ -680,6 +703,10 @@ require('lazy').setup({
             },
           },
         },
+        -- helm_ls = {},
+        -- terraformls = {},
+        -- tflint = {},
+        -- tfsec = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -912,6 +939,22 @@ require('lazy').setup({
     end,
   },
 
+  -- Gruvbox colorscheme
+  {
+    'ellisonleao/gruvbox.nvim',
+    priority = 1000, -- load before other UI plugins
+    config = function()
+      require('gruvbox').setup {
+        contrast = 'soft', -- can be "hard", "medium", or "soft"
+        palette_overrides = {},
+        overrides = {},
+        transparent_mode = false,
+      }
+      -- vim.o.background = 'light' -- set light mode
+      -- vim.cmd.colorscheme 'gruvbox'
+    end,
+  },
+
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -1011,7 +1054,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!

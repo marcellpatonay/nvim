@@ -20,6 +20,17 @@ return {
           ['\\'] = 'close_window',
         },
       },
+      filtered_items = {
+        visible = true,
+        hide_dotfiles = false,
+        hide_gitignored = false,
+      },
     },
   },
+  config = function(_, opts)
+    require('neo-tree').setup(opts)
+    vim.cmd [[
+    hi! link NeoTreeDotfile NeoTreeFileName
+    ]]
+  end,
 }
