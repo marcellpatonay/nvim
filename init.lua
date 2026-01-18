@@ -157,6 +157,41 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- [[ Basic Keymaps ]]
+--  See `:help vim.keymap.set()`
+
+-- Clear highlights on search when pressing <Esc> in normal mode
+--  See `:help hlsearch`
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+
+-- Diagnostic keymaps
+vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
+-- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
+-- is not what someone will guess without a bit more experience.
+--
+-- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
+-- or just use <C-\><C-n> to exit terminal mode
+vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+
+-- TIP: Disable arrow keys in normal mode
+-- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
+-- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
+-- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
+-- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+
+-- Keybi
+--  Use CTRL+<hjkl> to switch between windows
+--
+--  See `:help wincmd` for a list of all window commands
+vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
+vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
+vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
+vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- [[ Basic Autocommands ]]
+--  See `:help lua-guide-autocommands`
 -- [[ Indentation ]]
 
 vim.api.nvim_create_autocmd('FileType', {
@@ -178,41 +213,30 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.opt_local.expandtab = true -- Expand tab to 2 spaces
   end,
 })
--- [[ Basic Keymaps ]]
---  See `:help vim.keymap.set()`
 
--- Clear highlights on search when pressing <Esc> in normal mode
---  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'html', 'css' },
+  callback = function()
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.expandtab = true
+  end,
+})
 
--- Diagnostic keymaps
-vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+-- Detect Helm templates correctly
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+  pattern = {
+    'Chart.yaml',
+    'values.yaml',
+    'values.yml',
+    '**templates/*.yaml',
+    '**templates/*.tpl',
+  },
+  callback = function()
+    vim.bo.filetype = 'helm'
+  end,
+})
 
--- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
--- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
--- is not what someone will guess without a bit more experience.
---
--- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
--- or just use <C-\><C-n> to exit terminal mode
--- vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
-
--- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
-
--- Keybi
---  Use CTRL+<hjkl> to switch between windows
---
---  See `:help wincmd` for a list of all window commands
--- vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
--- vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
--- vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
--- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
-
--- [[ Basic Autocommands ]]
---  See `:help lua-guide-autocommands`
 --
 --[[ Own keybinds ]]
 --
@@ -655,7 +679,11 @@ require('lazy').setup({
             },
           },
         },
-        puppet = {},
+        puppet = {
+          cmd = { '/Users/marcell/.local/share/nvim/mason/bin/puppet-languageserver', '--stdio' },
+          filetypes = { 'puppet' },
+          root_dir = require('lspconfig.util').root_pattern('manifests', '.git', 'hiera.yaml'),
+        },
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -664,31 +692,12 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        ts_ls = {
-          -- Extra settings for JavaScript/TypeScript
-          -- init_options = {
-          --   hostInfo = 'neovim',
-          --   preferences = {
-          --     includeCompletionsForModuleExports = true,
-          --     includeCompletionsWithInsertText = true,
-          --     includeCompletionsWithSnippetText = true,
-          --     includeAutomaticOptionalChainCompletions = true,
-          --     includeCompletionsForImportStatements = true,
-          --     providePrefixAndSuffixTextForRename = false,
-          --     quotePreference = 'auto',
-          --   },
-          -- },
-          -- settings = {
-          --   javascript = {
-          --     suggest = { completeFunctionCalls = true },
-          --     validate = { enable = true },
-          --   },
-          --   typescript = {
-          --     suggest = { completeFunctionCalls = true },
-          --   },
-          -- },
-        },
 
+        ts_ls = {
+          root_dir = function(fname)
+            return require('lspconfig.util').root_pattern('package.json', 'tsconfig.json', 'jsconfig.json', '.git')(fname) or vim.fn.getcwd()
+          end,
+        },
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -703,10 +712,18 @@ require('lazy').setup({
             },
           },
         },
-        -- helm_ls = {},
-        -- terraformls = {},
-        -- tflint = {},
-        -- tfsec = {},
+        helm_ls = {
+          filetypes = {
+            'helm',
+            'yaml.helm-values',
+            'yaml',
+            'yaml.gotmpl',
+            'gotmpl',
+          },
+        },
+        terraformls = {},
+        tflint = {},
+        trivy = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -932,7 +949,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      -- vim.cmd.colorscheme 'tokyonight-night'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -950,8 +967,8 @@ require('lazy').setup({
         overrides = {},
         transparent_mode = false,
       }
-      -- vim.o.background = 'light' -- set light mode
-      -- vim.cmd.colorscheme 'gruvbox'
+      vim.o.background = 'dark' -- set light mode
+      vim.cmd.colorscheme 'gruvbox'
     end,
   },
 
@@ -1045,7 +1062,7 @@ require('lazy').setup({
   --
   -- require 'kickstart.plugins.debug',
   require 'kickstart.plugins.indent_line',
-  -- require 'kickstart.plugins.lint',
+  require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
