@@ -722,8 +722,8 @@ require('lazy').setup({
           },
         },
         terraformls = {},
-        tflint = {},
-        trivy = {},
+        -- trivy = {},
+        jsonls = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -1015,6 +1015,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
+    branch = 'master',
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
