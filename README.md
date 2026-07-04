@@ -1,5 +1,12 @@
 # kickstart.nvim
 
+## Version
+nvim --version
+NVIM v0.11.7
+Build type: Release
+LuaJIT 2.1.1741730670
+
+
 ## Introduction
 
 A starting point for Neovim that is:
